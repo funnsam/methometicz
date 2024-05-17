@@ -1,0 +1,3 @@
+assi true λx. λy. x
+
+(print (true 1 2))      <| should be 1
