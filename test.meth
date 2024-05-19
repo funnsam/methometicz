@@ -1,3 +1,4 @@
-assi true λx. λy. x
+def true λx. λy. x     <| basic stuff
+def false λx. λy. y
 
 (print (true 1 2))      <| should be 1

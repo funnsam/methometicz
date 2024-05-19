@@ -6,7 +6,7 @@ pub use logos::*;
 pub enum Token {
     #[token("λ")]
     Lambda,
-    #[token("assi")]
+    #[token("def")]
     Store,
     #[token(".")]
     Dot,
