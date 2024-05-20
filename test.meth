@@ -20,31 +20,15 @@ def is_zero λn. ((n λx. false) true)
 def ++ λa. λb. λc. (b a)
 def + λx y. λs. λz. ((x s) ((y s) z))
 
+|> hello!
+(print_char 72 101 108 108 111 44 32 119 111 114 108 100 33 10)
+
 |> test operators
-(print_dbg ((& false false) 1 0))
-(print_dbg ((& false true) 1 0))
-(print_dbg ((& true false) 1 0))
-(print_dbg ((& true true) 1 0))
-
-(print_char 10)
-
-(print_dbg ((! false) 1 0))
-(print_dbg ((! true) 1 0))
-
-(print_char 10)
-
-(print_dbg ((| false false) 1 0))
-(print_dbg ((| false true) 1 0))
-(print_dbg ((| true false) 1 0))
-(print_dbg ((| true true) 1 0))
-
-(print_char 10)
-
-(print_dbg ((^ false false) 1 0))
-(print_dbg ((^ false true) 1 0))
-(print_dbg ((^ true false) 1 0))
-(print_dbg ((^ true true) 1 0))
-
-(print_char 10)
-
+(print_dbg ((! false) 1 0) ((! true) 1 0))
+(print_dbg ((& false false) 1 0) ((& false true) 1 0) ((& true false) 1 0) ((& true true) 1 0))
+(print_dbg ((| false false) 1 0) ((| false true) 1 0) ((| true false) 1 0) ((| true true) 1 0))
+(print_dbg ((^ false false) 1 0) ((^ false true) 1 0) ((^ true false) 1 0) ((^ true true) 1 0))
+(print_dbg ((!& false false) 1 0) ((!& false true) 1 0) ((!& true false) 1 0) ((!& true true) 1 0))
+(print_dbg ((!| false false) 1 0) ((!| false true) 1 0) ((!| true false) 1 0) ((!| true true) 1 0))
+(print_dbg ((!^ false false) 1 0) ((!^ false true) 1 0) ((!^ true false) 1 0) ((!^ true true) 1 0))
 (print_dbg (flatten (+ 3 5)))
