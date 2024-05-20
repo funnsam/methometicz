@@ -1,4 +1,6 @@
-def true λx. λy. x     <| basic stuff
+def true λx. λy. x      <| basic stuff
 def false λx. λy. y
 
-(print (true 1 2))      <| should be 1
+def is_zero λn. ((n λx. false) true)
+
+(print (((is_zero λf. λx. (f x)) 1) 0))    <| should be 1

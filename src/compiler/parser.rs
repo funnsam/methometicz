@@ -101,18 +101,6 @@ impl<'a> Parser<'a> {
 
                 Some(Expr { kind: ExprKind::Lambda(ids, Box::new(bd)), span: start..end })
             },
-            Token::Plus => {
-                let start = self.lex.span().start;
-
-                let l = self.parse_expr();
-                let l = self.must(l);
-
-                let r = self.parse_expr();
-                let r = self.must(r);
-                let end = r.span.end;
-
-                Some(Expr { kind: ExprKind::Add(Box::new(l), Box::new(r)), span: start..end })
-            },
             Token::AppliStart => {
                 let start = self.lex.span().start;
 
@@ -171,8 +159,7 @@ pub struct Expr<'a> {
 #[derive(Debug)]
 pub enum ExprKind<'a> {
     Ident(&'a str),
-    Number(f64),
+    Number(u64),
     Lambda(Vec<&'a str>, Box<Expr<'a>>),
-    Add(Box<Expr<'a>>, Box<Expr<'a>>),
     Call(Box<Expr<'a>>, Vec<Expr<'a>>),
 }
