@@ -4,13 +4,11 @@ def id λx. x
 def true λx y. x
 def false λx y. y
 
-|> common operators
+|> common boolean operators
 def & λx y. (x y false)
 def ! λx. (x false true)
 def | λx y. (x true y)
 def ^ λx y. (x (! y) y)
-
-|> inverted operators
 def !& λx y. (! (& x y))
 def !| λx y. (! (| x y))
 def !^ λx y. (! (^ x y))
