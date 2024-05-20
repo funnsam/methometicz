@@ -12,7 +12,7 @@ pub enum Token {
     #[token(".")]
     Dot,
 
-    #[regex(r"[a-zA-Z_\+\-\*\/]+")]
+    #[regex(r"[^λ\.\(\)\s\d][^λ\.\(\)\s]*")]
     Ident,
     #[regex(r"\d+", callback = |lex| lex.slice().parse::<u64>().unwrap())]
     Number(u64),
