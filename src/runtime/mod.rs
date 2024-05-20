@@ -4,12 +4,12 @@ use std::collections::HashMap;
 pub fn run<'a>(ast: &'a Ast<'a>) {
     let mut defs = HashMap::new();
 
-    defs.insert("print_dbg", RtValue::IntLambda(&|i| {
+    defs.insert("print_dbg", RtValue::IntLambda(&|_, i| {
         println!("{i:?}");
         RtValue::Numeral(0)
     }));
 
-    defs.insert("print_char", RtValue::IntLambda(&|i| {
+    defs.insert("print_char", RtValue::IntLambda(&|_, i| {
         for i in i.iter() {
             match i {
                 RtValue::Numeral(n) | RtValue::ChurchNumeral { f: _, n } => print!(
@@ -21,6 +21,23 @@ pub fn run<'a>(ast: &'a Ast<'a>) {
         }
 
         RtValue::Numeral(0)
+    }));
+
+    defs.insert("flatten", RtValue::IntLambda(&|int, i| {
+        assert_eq!(1, i.len());
+
+        use core::sync::atomic::*;
+        static CNT: AtomicU64 = AtomicU64::new(0);
+
+        CNT.store(0, Ordering::Relaxed);
+
+        let a = int.call_fn(&i[0], vec![RtValue::IntLambda(&|_, _| {
+            CNT.fetch_add(1, Ordering::Relaxed);
+            RtValue::Numeral(0)
+        })]);
+        int.call_fn(&a, vec![RtValue::Numeral(0)]);
+
+        RtValue::Numeral(CNT.load(Ordering::Relaxed))
     }));
 
     let mut int = Interpreter {
@@ -48,7 +65,7 @@ enum RtValue<'a> {
         arguments: &'a [&'a str],
         body: &'a Expr<'a>,
     },
-    IntLambda(&'a dyn Fn(Vec<RtValue<'a>>) -> RtValue<'a>),
+    IntLambda(&'a dyn FnMut(&mut Interpreter<'a>, Vec<RtValue<'a>>) -> RtValue<'a>),
 }
 
 impl<'a> Interpreter<'a> {
@@ -121,7 +138,7 @@ impl<'a> Interpreter<'a> {
 
                 acc
             },
-            RtValue::IntLambda(f) => f(args),
+            RtValue::IntLambda(f) => unsafe { core::mem::transmute::<_, &mut dyn FnMut(_, _) -> _>(*f)(self, args) },
         }
     }
 }

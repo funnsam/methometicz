@@ -47,4 +47,4 @@ def + λx y. λs. λz. ((x s) ((y s) z))
 
 (print_char 10)
 
-(print_dbg ((is_zero (+ 0 0)) 1 0))
+(print_dbg (flatten (+ 3 5)))
