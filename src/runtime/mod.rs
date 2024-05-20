@@ -26,18 +26,14 @@ pub fn run<'a>(ast: &'a Ast<'a>) {
     defs.insert("flatten", RtValue::IntLambda(&|int, i| {
         assert_eq!(1, i.len());
 
-        use core::sync::atomic::*;
-        static CNT: AtomicU64 = AtomicU64::new(0);
-
-        CNT.store(0, Ordering::Relaxed);
-
-        let a = int.call_fn(&i[0], vec![RtValue::IntLambda(&|_, _| {
-            CNT.fetch_add(1, Ordering::Relaxed);
-            RtValue::Numeral(0)
+        let a = int.call_fn(&i[0], vec![RtValue::IntLambda(&|_, i| {
+            RtValue::Numeral(match i[0] {
+                RtValue::Numeral(n) => n + 1,
+                _ => unsafe { core::hint::unreachable_unchecked() },
+            })
         })]);
-        int.call_fn(&a, vec![RtValue::Numeral(0)]);
 
-        RtValue::Numeral(CNT.load(Ordering::Relaxed))
+        int.call_fn(&a, vec![RtValue::Numeral(0)])
     }));
 
     let mut int = Interpreter {
@@ -91,7 +87,12 @@ impl<'a> Interpreter<'a> {
         match expr {
             ExprKind::Ident(id) => self.defs.get(id).unwrap_or_else(|| panic!("Unknown variable {id}")).clone(),
             ExprKind::Number(n) => RtValue::Numeral(*n),
-            ExprKind::Lambda(args, body) => RtValue::LambdaFn { state: self.defs.clone(), arguments: args, body },
+            ExprKind::Lambda(args, body) => {
+                let mut state: HashMap<&str, RtValue<'a>> = HashMap::with_capacity(args.len() + args.len());
+                state.extend(self.defs.iter().map(|(i, j)| (*i, j.clone())));
+
+                RtValue::LambdaFn { state, arguments: args, body }
+            },
             ExprKind::Call(id, args) => {
                 let id = self.run_expr(&id.kind);
                 let args = args.iter().map(|e| self.run_expr(&e.kind)).collect();
@@ -104,17 +105,16 @@ impl<'a> Interpreter<'a> {
         match id {
             RtValue::LambdaFn { state, arguments, body } => {
                 assert_eq!(arguments.len(), args.len());
-
-                let ps = self.defs.clone();
                 let mut ns = state.clone();
 
                 for (n, v) in arguments.iter().zip(args) {
                     ns.insert(n, v);
                 }
 
-                self.defs = ns;
+                core::mem::swap(&mut self.defs, &mut ns);
                 let ret = self.run_expr(&body.kind);
-                self.defs = ps;
+                core::mem::swap(&mut self.defs, &mut ns);
+
                 ret
             },
             RtValue::Numeral(n) => {
